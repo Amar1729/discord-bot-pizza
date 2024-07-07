@@ -76,14 +76,14 @@ class Pizza:
         Pizza._write(content)
 
     @staticmethod
-    def next() -> None:
+    def next(jumps: int = 1) -> None:
         content = Pizza._read()
 
         for idx, obj in enumerate(content):
             current = obj["current"]
 
             if current:
-                next_idx = (idx + 1) % len(content)
+                next_idx = (idx + jumps) % len(content)
                 break
         else:
             print("No current user found?")
@@ -114,8 +114,12 @@ async def on_message(message) -> None:
     if message.author == client.user:
         return
 
-    if message.content.lower() == "next pizza":
-        Pizza.next()
+    if message.content.lower().startswith("next pizza"):
+        try:
+            jumps = int(message.content.split(" ")[-1]) % 4
+        except ValueError:
+            jumps = 1
+        Pizza.next(jumps)
         return
 
     if message.content.lower() == "pizza":
