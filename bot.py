@@ -13,6 +13,9 @@ from dotenv import load_dotenv
 
 PIZZA_FILE = Path("./pizza-users.json")
 
+if not Path("./.env").exists():
+    raise RuntimeError("Must have a local .env file, specifiying TOKEN.")
+
 load_dotenv()
 
 TOKEN = os.environ["TOKEN"]
