@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
+import sys
 from pathlib import Path
 
 import discord
@@ -41,6 +43,22 @@ class Pizza:
     @staticmethod
     def users() -> list[str]:
         return [str(obj["name"]) for obj in Pizza._read()]
+
+    @staticmethod
+    def _entry(user: str, current: bool = False) -> dict[str, str | bool]:
+        return {"name": user, "current": current}
+
+    @staticmethod
+    def add_user(user: str) -> None:
+        if not Pizza._pizza_file.exists():
+            Pizza._write([Pizza._entry(user, current=True)])
+            return
+
+        if user not in Pizza.users():
+            content = Pizza._read()
+            content.append(Pizza._entry(user))
+            Pizza._write(content)
+            return
 
     @staticmethod
     def set_user(user: str) -> None:
@@ -104,5 +122,27 @@ async def on_message(message) -> None:
         await message.channel.send(Pizza.text())
 
 
+def main_cli() -> None:
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--print", action="store_true")
+    parser.add_argument("--add-user", help="username to add")
+    parser.add_argument("--set-current", choices=Pizza.users(), help="user to set as current")
+
+    args = parser.parse_args()
+
+    if len(sys.argv) == 1:
+        client.run(TOKEN)
+
+    elif args.print:
+        print(Pizza.text())
+
+    elif args.add_user:
+        Pizza.add_user(args.add_user)
+
+    elif args.set_current:
+        Pizza.set_user(args.set_current)
+
+
 if __name__ == "__main__":
-    client.run(TOKEN)
+    main_cli()
